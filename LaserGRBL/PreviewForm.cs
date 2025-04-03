@@ -60,7 +60,7 @@ namespace LaserGRBL
             }
         }
 
-        private void CreatePanel()
+         private void CreatePanel()
         {
 			if (GrblPanel != null)
             {

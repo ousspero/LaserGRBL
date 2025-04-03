@@ -62,9 +62,16 @@ namespace LaserGRBL.RasterConverter
 
 			CBLaserON.Items.Add(LaserOptions[0]);
 			CBLaserON.Items.Add(LaserOptions[1]);
+            Load += ConvertSizeAndOptionForm_Load;
 		}
 
-		private void AssignMinMaxLimit()
+        private void ConvertSizeAndOptionForm_Load(object sender, EventArgs e)
+        {
+            if (ConfirmOutOfBoundary())
+                DialogResult = DialogResult.OK;
+        }
+
+        private void AssignMinMaxLimit()
 		{
 			int tableWidth = 1000;
 			int tableHeight = 1000;
@@ -335,6 +342,7 @@ namespace LaserGRBL.RasterConverter
 			}
 		}
 
+		//todo: trigger it auto
 		private void BtnCreate_Click(object sender, EventArgs e)
 		{
 			if (ConfirmOutOfBoundary())

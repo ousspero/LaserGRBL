@@ -656,7 +656,8 @@ namespace LaserGRBL
 
 			try
 			{
-				if (filename == null)
+
+                if (filename == null)
 				{
 					using (OpenFileDialog ofd = new OpenFileDialog())
 					{
