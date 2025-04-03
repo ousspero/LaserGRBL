@@ -640,31 +640,31 @@ namespace LaserGRBL
         {
             udpClient = new UdpClient(Port);
 
-            //     while (listening)
-            //     {
-            //         try
-            //         {
-            //             // Wait asynchronously for a message
-            //             UdpReceiveResult result = await udpClient.ReceiveAsync();
-            //             string receivedMessage = Encoding.ASCII.GetString(result.Buffer);
+            while (listening)
+            {
+                try
+                {
+                    // Wait asynchronously for a message
+                    UdpReceiveResult result = await udpClient.ReceiveAsync();
+                    string receivedMessage = Encoding.ASCII.GetString(result.Buffer);
 
-            //                 // Execute the task on the UI thread if needed
-            //                 this.Invoke((MethodInvoker)delegate
-            //                 {
-            //Core.OpenFile(filename: receivedMessage);
-            //                 });
-            //          }
-            //         catch (ObjectDisposedException)
-            //         {
-            //             // Socket has been closed, exit the loop
-            //             break;
-            //         }
-            //         catch (Exception ex)
-            //         {
-            //             // Optionally log or handle other exceptions
-            //             MessageBox.Show("Error: " + ex.Message);
-            //         }
-            //     }
+                    // Execute the task on the UI thread if needed
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        Core.OpenFile(filename: receivedMessage);
+                    });
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Socket has been closed, exit the loop
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    // Optionally log or handle other exceptions
+                    MessageBox.Show("Error: " + ex.Message);
+                }
+            }
         }
 
         private void MnFileSend_Click(object sender, EventArgs e)
