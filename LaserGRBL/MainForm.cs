@@ -10,6 +10,8 @@ using LaserGRBL.WiFiConfigurator;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -646,13 +648,29 @@ namespace LaserGRBL
                 {
                     // Wait asynchronously for a message
                     UdpReceiveResult result = await udpClient.ReceiveAsync();
-                    string receivedMessage = Encoding.ASCII.GetString(result.Buffer);
+  
+                    using (MemoryStream ms = new MemoryStream(result.Buffer))
+                    {
+                        // Convert received bytes to Bitmap
+                        using (Bitmap receivedBitmap = new Bitmap(ms))
+                        {
+                            // Generate temporary file path
+                            string tempFilePath = Path.Combine(Path.GetTempPath(), "ReceivedImage.png");
+
+                            // Save image to temp file (as PNG)
+                            receivedBitmap.Save(tempFilePath, System.Drawing.Imaging.ImageFormat.Png);
+
+                            this.Invoke((MethodInvoker)delegate
+                            {
+                                Core.OpenFile(filename: tempFilePath);
+                            });
+
+                        }
+                    }
+
 
                     // Execute the task on the UI thread if needed
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        Core.OpenFile(filename: receivedMessage);
-                    });
+
                 }
                 catch (ObjectDisposedException)
                 {
