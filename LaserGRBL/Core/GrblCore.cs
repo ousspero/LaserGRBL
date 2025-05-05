@@ -23,6 +23,7 @@ using System.Xml.Linq;
 using Tools;
 using static LaserGRBL.GrblCore;
 using static LaserGRBL.HotKeysManager;
+using System.Threading.Tasks;
 
 namespace LaserGRBL
 {
@@ -3634,33 +3635,25 @@ namespace LaserGRBL
                 if (global) mGlobalEnd = mEnd;
                 mCompleted = true;
                 mStarted = false;
-                SendOrderUdp();
+                SendMessages("FINISHED");
+                //SendOrderUdp();
                 return true;
             }
 
             return false;
         }
 
-        private async void SendOrderUdp()
+        private async void SendMessages(string message)
         {
-            try
+            using (UdpClient sender = new UdpClient())
             {
-                using (UdpClient sender = new UdpClient())
-                {
-                    string order = "FINISHED";
-                    string xmlMessage = $"<Ext><ORDER>{order}</ORDER></Ext>";
-                    IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(CarverConfigObject.PcIP), CarverConfigObject.PcPort);
-                    byte[] messageBytes = Encoding.UTF8.GetBytes(xmlMessage);
-                    await sender.SendAsync(messageBytes, messageBytes.Length, remoteEndPoint);
-                }
-            }
-            catch (SocketException ex)
-            {
-            }
-            catch (Exception ex)
-            {
+                IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(CarverConfigObject.PcIP),CarverConfigObject.PcPort);
+                byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+
+                await sender.SendAsync(messageBytes, messageBytes.Length, remoteEndPoint);
             }
         }
+
 
         public void JobIssue(GrblCore.DetectedIssue issue)
         { mLastIssue = issue; }
