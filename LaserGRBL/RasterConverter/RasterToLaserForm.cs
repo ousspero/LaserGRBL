@@ -262,12 +262,13 @@ namespace LaserGRBL.RasterConverter
 
                     StoreSettings();
                     Project.AddSettings(GetActualSettings()); // Store project settings
+                    
 
                     IP.BorderSpeed = 1000;
                     IP.MaxPower = 10;
                     IP.MinPower = 0;
-                    IP.AutoTrim();
                     IP.GenerateGCode(); //processo asincrono che ritorna con l'evento "OnGenerationComplete"
+                    
                 }
             }
         }
