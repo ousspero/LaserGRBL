@@ -7,7 +7,7 @@ namespace LaserGRBL
     public class CarverConfig
     {
         public string PcIP { get; set; } = "172.31.1.130";
-        public int PcPort { get; set; } = 30000;
+        public int PcPort { get; set; } = 30001;
         public CarverConfig()
         {
         }
