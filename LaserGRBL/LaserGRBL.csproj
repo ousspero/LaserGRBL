@@ -135,6 +135,7 @@
     <Compile Include="ComWrapper\MySerial\WinSerialStream.cs" />
     <Compile Include="ComWrapper\RJCPSerial.cs" />
     <Compile Include="ComWrapper\UsbSerial2.cs" />
+    <Compile Include="Core\CarverConfig.cs" />
     <Compile Include="Generator\CuttingTest.cs">
       <SubType>Form</SubType>
     </Compile>
