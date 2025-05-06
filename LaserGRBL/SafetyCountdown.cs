@@ -21,7 +21,7 @@ namespace LaserGRBL
 			IconsMgr.PreparePictureBox(pictureBox1, "mdi-safety-goggles");
 			IconsMgr.PrepareButton(BtnStart, "mdi-checkbox-marked");
             IconsMgr.PrepareButton(BtnCancel, "mdi-close-box");
-            down = 5;
+            down = 2;
 			lbl = BtnStart.Text;
 			BtnStart.Text = $"{lbl} ({down})";
 		}
