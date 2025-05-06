@@ -636,7 +636,7 @@ namespace LaserGRBL
 
         private UdpClient udpClient;
         private bool listening = true;
-        private const int Port = 11000; // Choose your UDP port
+        private const int Port = 30001; // Choose your UDP port
 
         private async void StartUdpListener()
         {
