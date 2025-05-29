@@ -104,7 +104,8 @@ namespace LaserGRBL
 
 		internal static bool CanGo()
 		{
-			if (Settings.GetObject("DisableSafetyCountdown", false))
+			return true; // Always allow to go, safety countdown is not mandatory
+            if (Settings.GetObject("DisableSafetyCountdown", false))
 				return true;
 
 			using (SafetyCountdown es = new SafetyCountdown())
