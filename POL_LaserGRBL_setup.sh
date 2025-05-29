@@ -1,20 +1,20 @@
 #!/bin/bash
-# Date : (2021-11-17)
-# Distribution used to test : Debian Bullseye 64-bit
-# Author : MarcelG
+# Date : (2025-05-29)
+# Distribution used to test : Debian Bookworm 64-bit / Voidlinux 64-bit
+# Author : MarcelW
 # Licence : GNU GPLv3
-# PlayOnLinux: 4.3.4
+# PlayOnLinux: 4.3.4 / 4.4
 # Howto: In Playonlinux/Playonmac select "Tools->Execute locale script" to run this setup script
  
 [ "$PLAYONLINUX" = "" ] && exit 0
 source "$PLAYONLINUX/lib/sources"
        
 PREFIX="LaserGRBL"
-WINEVERSION="5.22"
+WINEVERSION="9.0-rc5"
 TITLE="LaserGRBL"
 EDITOR="arkypita"
 GAME_URL="https://lasergrbl.com"
-AUTHOR="MarcelG"
+AUTHOR="MarcelW"
        
 #Initialization
 POL_System_TmpCreate "LaserGRBLSetup"
@@ -536,7 +536,7 @@ POL_SetupWindow_InstallMethod "LOCAL,DOWNLOAD"
  
 if [ "$INSTALL_METHOD" = "LOCAL" ] ; then
 	cd ~/Downloads
-	POL_SetupWindow_browse "$(eval_gettext 'Please select $TITLE install file.')" "$TITLE"
+	POL_SetupWindow_browse "$(eval_gettext 'Please select $TITLE install file. For automatically download of latest version make sure you have installed curl!')" "$TITLE"
 	INSTALLER="$APP_ANSWER"
 elif [ "$INSTALL_METHOD" = "DOWNLOAD" ] ; then
 	cd $POL_System_TmpDir
@@ -548,8 +548,8 @@ fi
 # Create Prefix
 POL_Wine_SelectPrefix "$PREFIX"
 POL_Wine_PrefixCreate "$WINEVERSION"
-POL_System_SetArch 'x86'
-export WINEARCH='win32'
+POL_System_SetArch 'auto'
+#export WINEARCH='win32'
  
 # Configuration
 Set_OS "win7"
@@ -599,5 +599,6 @@ fi
 POL_Shortcut "LaserGRBL.exe" "$TITLE"
  
 POL_System_TmpDelete
+POL_SetupWindow_message "$(eval_gettext 'Setup of LaserGRBL successful. You can launch it in PlayOnLinux or via Desktop shortcut.')" "$TITLE"
 POL_SetupWindow_Close
 exit 0
