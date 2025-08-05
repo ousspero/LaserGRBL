@@ -148,16 +148,16 @@
   </data>
   <data name="BtnUnlockFromStuck.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAgxJREFUOE/F
-        kl1Ik1EYx5/X5ZorP3JajrLJwtlClmYLzSXdFBgS1QiSAqMutSC7kog+BmF0UQl9QRFDqBGWYV+6CzOs
-        dVE3QpBkJKQFehOlZSa9v07biVGW3QT94OU85+X//59znnPkv9Am4ginSJ+e/hXjy0KZo2u5KWJrT5Pe
-        iFWu6V9/BhHrmwJp7S8wnsREZqm5Ec2UyMPiLG7YpVrLfg8umffWIz0TO528b/LT55CDDzKleXRPKY/c
-        9uE7IhYtnQ4l4v5UYjyfasiHxsVwspzBtblTQzVOc+JAGU8z5JiWJmCD3GadBOJ1hZRTZR0htBRCRdDk
-        hn0q5MwaaFjE4Po8czhHPHHjD9hseUV9ziSrpYUtcz9yoQxO+aDZi3m4MBHS6FJjIa9dRq+2JSGY8pKY
-        H04vgyvFcKkEzpZCi4/Jbbl8qLR95aiHsR1ORvNlt7YlYZMM0OmEdrVKZAmEvXBR7SBcgRmwDlEkdZ+D
-        Wea7StvYuEPStS0JW1XAPQfcyoM21birKqRV9eD8KliRaBg+CanvctzwK2w3BohmQKcK6VAh11VIx3I4
-        pI7jl/1a9v1dpOryZ6iTF3TboCcdotlwd4EKUCH3V6obmG8SkBPKPMO975J+Yhbomq0amAZH7FCvxtrU
-        carlMVVyTh0lW8unowKesVdGCEoXG+W4ehe11Ih3xlX/DSLfAOkWEA3WSlxpAAAAAElFTkSuQmCC
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAfdJREFUOE/F
+        kVtI02Echt+/5pqWh5yWo+Zk4mExlocWmibdFCgS1QiSAsMutUC7GhEdhDC6qIROkIQINcIy1km9KMNa
+        F3UjBEmLhLRAb6K0zKQ9gZawP+VV0HP1fT/e5/3g+0n/g27J1hmnIfP8bxjfV2vZ78ttydqTqMGgRTdi
+        Y38AyfI+R13DOcbzsLQEyehPVfCJJ41bSao252PAqRUf8jUwvc/Op4CPIZuOPE5V28SBYp66ksbuSfFm
+        ZwGK5PpaZLyabXJASzacKWNkc+bsaK09On24lBcpOhkr1OguW1Q5dy5XGVWWcVoLobUAAi5ozobzm6Bp
+        DSNbs6JjGcqPLdgR/5bGjBk2qp2dy79wuRTOeqHNTfRY3nxJixMCebxzGoMx8lyBP+4NYR+cWwvXPNBR
+        BBeKod3LzO5MPldYf3Ain8m9diYc2m/2xXZF6LVDjxOCudDphite6CwnWmkZpUD13/xp0Y8V1skpm5LN
+        vtilCA9scCcLuh1wPRe6CuHSBiiZ/zC8asWrq2Z3DvYYEfpToNcGoSy46YDQOjjqAZ8OLeSkhFjzF9Tr
+        NQ+tMJAM/elwfxWEHPBoPTSvjFKp0yy69wYNE46HvqXQkQjHk6AxEeoSpqjWM6p0kRKlm70FaNBLDmoc
+        v/rYplPUqI5auRd99V/xE+kWEA2N/+ECAAAAAElFTkSuQmCC
 </value>
   </data>
   <data name="BtnUnlockFromStuck.Size" type="System.Drawing.Size, System.Drawing">

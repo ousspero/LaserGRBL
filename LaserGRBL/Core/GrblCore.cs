@@ -12,18 +12,19 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
+using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using Tools;
 using static LaserGRBL.GrblCore;
 using static LaserGRBL.HotKeysManager;
-using System.Threading.Tasks;
 
 namespace LaserGRBL
 {
@@ -3647,12 +3648,14 @@ namespace LaserGRBL
         {
             using (UdpClient sender = new UdpClient())
             {
-                IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(CarverConfigObject.PcIP),CarverConfigObject.PcPort);
+                IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(CarverConfigObject.PcIP), CarverConfigObject.PcPort);
                 byte[] messageBytes = Encoding.UTF8.GetBytes(message);
 
                 await sender.SendAsync(messageBytes, messageBytes.Length, remoteEndPoint);
             }
         }
+
+   
 
 
         public void JobIssue(GrblCore.DetectedIssue issue)

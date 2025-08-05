@@ -15,6 +15,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Windows.Forms;
@@ -638,8 +641,102 @@ namespace LaserGRBL
         private bool listening = true;
         private const int Port = 30001; // Choose your UDP port
 
+        public static LaserCommand FromByteArray(byte[] data)
+        {
+            using (var ms = new MemoryStream(data))
+            using (var reader = new BinaryReader(ms))
+            {
+                return new LaserCommand
+                {
+                    LaserOn = reader.ReadString(),
+                    LaserOff = reader.ReadString(),
+                    BorderSpeed = reader.ReadInt32(),
+                    MarkSpeed = reader.ReadInt32(),
+                    MinPower = reader.ReadInt32(),
+                    MaxPower = reader.ReadInt32(),
+                };
+            }
+        }
+
+        public async Task StartListeningAsync(int port)
+        {
+            using (UdpClient listener = new UdpClient(port))
+            {
+                while (listening)
+                {
+
+                    IPEndPoint groupEP = new IPEndPoint(IPAddress.Any, port);
+
+                    Console.WriteLine($"Listening on UDP port {port}...");
+
+
+                    UdpReceiveResult result = await listener.ReceiveAsync();
+                    byte[] receivedBytes = result.Buffer;
+
+                    try
+                    {
+
+
+                        //LaserCommand command = JsonSerializer.Deserialize<LaserCommand>(receivedBytes);
+                        LaserCommand command = FromByteArrayCommand(receivedBytes);
+
+                        CarverConfig.laserCommand= command;
+
+                        byte[] imageBytes = Convert.FromBase64String(command.Image);
+                        File.WriteAllBytes("received_image.png", imageBytes);
+
+
+                        using (MemoryStream ms = new MemoryStream(imageBytes))
+                        {
+                            // Convert received bytes to Bitmap
+                            using (Bitmap receivedBitmap = new Bitmap(ms))
+                            {
+                                // Generate temporary file path
+                                string tempFilePath = Path.Combine(Path.GetTempPath(), "ReceivedImage.png");
+
+                                // Save image to temp file (as PNG)
+                                receivedBitmap.Save(tempFilePath, System.Drawing.Imaging.ImageFormat.Png);
+
+                                this.Invoke((MethodInvoker)delegate
+                                {
+                                    Core.OpenFile(filename: tempFilePath);
+                                });
+
+                            }
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error deserializing message: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+
+        public LaserCommand FromByteArrayCommand(byte[] data)
+        {
+            using (var ms = new MemoryStream(data))
+            using (var reader = new BinaryReader(ms))
+            {
+                return new LaserCommand
+                {
+                    LaserOn = reader.ReadString(),
+                    LaserOff = reader.ReadString(),
+                    BorderSpeed = reader.ReadInt32(),
+                    MarkSpeed = reader.ReadInt32(),
+                    MinPower = reader.ReadInt32(),
+                    MaxPower = reader.ReadInt32(),
+                    Image = reader.ReadString()
+                };
+            }
+        }
+
         private async void StartUdpListener()
         {
+            await StartListeningAsync(Port);
+            return;
             udpClient = new UdpClient(Port);
 
             while (listening)
@@ -648,7 +745,7 @@ namespace LaserGRBL
                 {
                     // Wait asynchronously for a message
                     UdpReceiveResult result = await udpClient.ReceiveAsync();
-  
+
                     using (MemoryStream ms = new MemoryStream(result.Buffer))
                     {
                         // Convert received bytes to Bitmap
@@ -1497,6 +1594,7 @@ namespace LaserGRBL
                     e.Graphics.DrawRectangle(p, rect);
             }
         }
+
     }
 
     public class CustomMenuColor : ProfessionalColorTable
@@ -1507,4 +1605,20 @@ namespace LaserGRBL
         public override Color SeparatorLight
         { get { return ColorScheme.MenuSeparatorColor; } }
     }
+
+
+
+
+
+}
+
+public class LaserCommand
+{
+    public string LaserOn;
+    public string LaserOff;
+    public int BorderSpeed;
+    public int MarkSpeed;
+    public int MinPower;
+    public int MaxPower;
+    public string Image;
 }

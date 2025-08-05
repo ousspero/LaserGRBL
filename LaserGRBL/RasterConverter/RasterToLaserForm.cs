@@ -262,11 +262,14 @@ namespace LaserGRBL.RasterConverter
 
                     StoreSettings();
                     Project.AddSettings(GetActualSettings()); // Store project settings
-                    
 
-                    IP.BorderSpeed = 1000;
-                    IP.MaxPower = 10;
-                    IP.MinPower = 0;
+                    //
+                    if (CarverConfig.laserCommand != null)
+                    {
+                        IP.BorderSpeed = CarverConfig.laserCommand.BorderSpeed;
+                        IP.MaxPower = CarverConfig.laserCommand.MaxPower;
+                        IP.MinPower = CarverConfig.laserCommand.MinPower;
+                    }
                     IP.GenerateGCode(); //processo asincrono che ritorna con l'evento "OnGenerationComplete"
                     
                 }
