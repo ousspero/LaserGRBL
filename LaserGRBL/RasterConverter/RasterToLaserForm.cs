@@ -18,6 +18,7 @@ using LaserGRBL.Icons;
 using LaserGRBL.UserControls;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using static LaserGRBL.RasterConverter.ImageProcessor;
 
 namespace LaserGRBL.RasterConverter
 {
@@ -266,12 +267,31 @@ namespace LaserGRBL.RasterConverter
                     //
                     if (CarverConfig.laserCommand != null)
                     {
-                        IP.BorderSpeed = CarverConfig.laserCommand.BorderSpeed;
-                        IP.MaxPower = CarverConfig.laserCommand.MaxPower;
-                        IP.MinPower = CarverConfig.laserCommand.MinPower;
+
+                        if (IP.SelectedTool == Tool.Line2Line)
+                        {
+                            IP.BorderSpeed = CarverConfig.laserCommand.BorderSpeed;
+                            IP.MaxPower = CarverConfig.laserCommand.SMax;
+                            IP.MinPower = int.Parse(CarverConfig.laserCommand.SMin);
+                            IP.SelectedTool = CarverConfig.laserCommand.Conversion;
+                            IP.LineDirection = CarverConfig.laserCommand.Direction;
+                            IP.LaserOn = CarverConfig.laserCommand.LaserMode;
+
+                        }
+                        else
+                        {
+                            IP.FillingDirection = CarverConfig.laserCommand.Quality;
+                            IP.SelectedTool = CarverConfig.laserCommand.Conversion;
+                            IP.MaxPower = CarverConfig.laserCommand.SMax;
+                            IP.MinPower = int.Parse(CarverConfig.laserCommand.SMin);
+                            IP.LaserOn = CarverConfig.laserCommand.LaserMode;
+                            IP.BorderSpeed = CarverConfig.laserCommand.BorderSpeed;
+                            // filling speed
+                            IP.MarkSpeed = CarverConfig.laserCommand.FillingSpeed;
+                        }
                     }
                     IP.GenerateGCode(); //processo asincrono che ritorna con l'evento "OnGenerationComplete"
-                    
+
                 }
             }
         }
@@ -665,6 +685,7 @@ namespace LaserGRBL.RasterConverter
 
         private void UDFillingQuality_ValueChanged(object sender, EventArgs e)
         {
+
             if (IP != null)
                 IP.FillingQuality = UDFillingQuality.Value;
         }

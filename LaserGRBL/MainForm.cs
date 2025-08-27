@@ -24,6 +24,8 @@ using System.Windows.Forms;
 using System.Windows.Threading;
 using Tools;
 using static LaserGRBL.ColorScheme;
+using static LaserGRBL.RasterConverter.ImageProcessor;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static Tools.ModifyProgressBarColor;
 
 namespace LaserGRBL
@@ -650,10 +652,16 @@ namespace LaserGRBL
                 {
                     LaserOn = reader.ReadString(),
                     LaserOff = reader.ReadString(),
+                    FillingSpeed = reader.ReadInt32(),
                     BorderSpeed = reader.ReadInt32(),
-                    MarkSpeed = reader.ReadInt32(),
-                    MinPower = reader.ReadInt32(),
-                    MaxPower = reader.ReadInt32(),
+                    Conversion = (Tool)reader.ReadByte(),
+                    Direction = (Direction)reader.ReadByte(),
+                    LaserMode = reader.ReadString(),
+                    SMin = reader.ReadString(),
+                    SMax = reader.ReadInt32(),
+                    Quality = (Direction)reader.ReadByte(),
+                    Image = reader.ReadString(),
+
                 };
             }
         }
@@ -678,9 +686,9 @@ namespace LaserGRBL
 
 
                         //LaserCommand command = JsonSerializer.Deserialize<LaserCommand>(receivedBytes);
-                        LaserCommand command = FromByteArrayCommand(receivedBytes);
+                        LaserCommand command = FromByteArray(receivedBytes);
 
-                        CarverConfig.laserCommand= command;
+                        CarverConfig.laserCommand = command;
 
                         byte[] imageBytes = Convert.FromBase64String(command.Image);
                         File.WriteAllBytes("received_image.png", imageBytes);
@@ -714,25 +722,7 @@ namespace LaserGRBL
             }
         }
 
-
-        public LaserCommand FromByteArrayCommand(byte[] data)
-        {
-            using (var ms = new MemoryStream(data))
-            using (var reader = new BinaryReader(ms))
-            {
-                return new LaserCommand
-                {
-                    LaserOn = reader.ReadString(),
-                    LaserOff = reader.ReadString(),
-                    BorderSpeed = reader.ReadInt32(),
-                    MarkSpeed = reader.ReadInt32(),
-                    MinPower = reader.ReadInt32(),
-                    MaxPower = reader.ReadInt32(),
-                    Image = reader.ReadString()
-                };
-            }
-        }
-
+ 
         private async void StartUdpListener()
         {
             await StartListeningAsync(Port);
@@ -1616,9 +1606,13 @@ public class LaserCommand
 {
     public string LaserOn;
     public string LaserOff;
-    public int BorderSpeed;
-    public int MarkSpeed;
-    public int MinPower;
-    public int MaxPower;
     public string Image;
+    public int FillingSpeed;
+    public int BorderSpeed;
+    public Tool Conversion;
+    public Direction Direction;
+    public string LaserMode;
+    public string SMin;
+    public int SMax;
+    public Direction Quality;
 }
