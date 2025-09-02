@@ -9,6 +9,7 @@ using LaserGRBL.UserControls;
 using LaserGRBL.WiFiConfigurator;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Net;
@@ -133,8 +134,10 @@ namespace LaserGRBL
             RefreshColorSchema(); //include RefreshOverride();
             RefreshFormTitle();
             //RefreshMenuHotKeys(); // I don't like the behaviour and the aspect, so I comment it out
-            StartUdpListener();
-
+            
+            BackgroundWorker backgroundWorker = new BackgroundWorker();
+            backgroundWorker.DoWork += async (s, e) => StartUdpListener();
+            backgroundWorker.RunWorkerAsync();
         }
 
         public MainForm(string[] args) : this()
@@ -648,7 +651,7 @@ namespace LaserGRBL
             using (var ms = new MemoryStream(data))
             using (var reader = new BinaryReader(ms))
             {
-                return new LaserCommand
+                var laser = new LaserCommand
                 {
                     LaserOn = reader.ReadString(),
                     LaserOff = reader.ReadString(),
@@ -660,9 +663,10 @@ namespace LaserGRBL
                     SMin = reader.ReadString(),
                     SMax = reader.ReadInt32(),
                     Quality = (Direction)reader.ReadByte(),
-                    Image = reader.ReadString(),
-
                 };
+
+                laser.Image = reader.ReadBytes((int)(ms.Length - ms.Position)); // Read the remaining bytes as image data
+                return laser;
             }
         }
 
@@ -690,7 +694,7 @@ namespace LaserGRBL
 
                         CarverConfig.laserCommand = command;
 
-                        byte[] imageBytes = Convert.FromBase64String(command.Image);
+                        byte[] imageBytes = command.Image;
                         File.WriteAllBytes("received_image.png", imageBytes);
 
 
@@ -722,54 +726,68 @@ namespace LaserGRBL
             }
         }
 
- 
-        private async void StartUdpListener()
+
+        private async Task StartUdpListener()
         {
-            await StartListeningAsync(Port);
-            return;
-            udpClient = new UdpClient(Port);
+            //  await StartListeningAsync(Port);
 
-            while (listening)
+            var listener = new TcpListener(IPAddress.Any, Port);
+            listener.Start();
+
+            while (true)
             {
-                try
+                // Accept a client
+                using (TcpClient client = listener.AcceptTcpClient())
                 {
-                    // Wait asynchronously for a message
-                    UdpReceiveResult result = await udpClient.ReceiveAsync();
+                    client.NoDelay = true;
+                    client.ReceiveBufferSize = 4 * 1024 * 1024;
+                    client.SendBufferSize = 4 * 1024 * 1024;
 
-                    using (MemoryStream ms = new MemoryStream(result.Buffer))
+                    using (NetworkStream ns = client.GetStream())
                     {
-                        // Convert received bytes to Bitmap
-                        using (Bitmap receivedBitmap = new Bitmap(ms))
+                        ns.ReadTimeout = 30000;
+                        ns.WriteTimeout = 30000;
+
+                        // If the client may send multiple messages per connection, loop ReadLengthPrefixed
+                        var bytes = TcpHelpers.ReadLengthPrefixed(ns);
+                        if (bytes == null)
                         {
-                            // Generate temporary file path
-                            string tempFilePath = Path.Combine(Path.GetTempPath(), "ReceivedImage.png");
+                            Console.WriteLine("Client closed before sending data");
+                            continue;
+                        }
 
-                            // Save image to temp file (as PNG)
-                            receivedBitmap.Save(tempFilePath, System.Drawing.Imaging.ImageFormat.Png);
+                        var cmd = FromByteArray(bytes);
+                        CarverConfig.laserCommand = cmd;
 
-                            this.Invoke((MethodInvoker)delegate
+                        byte[] imageBytes = cmd.Image;
+                        File.WriteAllBytes("received_image.png", imageBytes);
+
+
+                        using (MemoryStream ms = new MemoryStream(imageBytes))
+                        {
+                            // Convert received bytes to Bitmap
+                            using (Bitmap receivedBitmap = new Bitmap(ms))
                             {
-                                Core.OpenFile(filename: tempFilePath);
-                            });
+                                // Generate temporary file path
+                                string tempFilePath = Path.Combine(Path.GetTempPath(), "ReceivedImage.png");
 
+                                // Save image to temp file (as PNG)
+                                receivedBitmap.Save(tempFilePath, System.Drawing.Imaging.ImageFormat.Png);
+
+                                this.Invoke((MethodInvoker)delegate
+                                {
+                                    Core.OpenFile(filename: tempFilePath);
+                                });
+
+                            }
                         }
                     }
 
-
-                    // Execute the task on the UI thread if needed
-
-                }
-                catch (ObjectDisposedException)
-                {
-                    // Socket has been closed, exit the loop
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    // Optionally log or handle other exceptions
-                    MessageBox.Show("Error: " + ex.Message);
                 }
             }
+
+ 
+
         }
 
         private void MnFileSend_Click(object sender, EventArgs e)
@@ -1601,12 +1619,58 @@ namespace LaserGRBL
 
 
 }
+public static class TcpHelpers
+{
+    public static void WriteLengthPrefixed(NetworkStream ns, byte[] payload)
+    {
+        var len = payload != null ? payload.Length : 0;
+        var lenBytes = BitConverter.GetBytes(len); // little-endian
+        ns.Write(lenBytes, 0, lenBytes.Length);
+        if (len > 0)
+            ns.Write(payload, 0, len);
+        ns.Flush();
+    }
+
+    public static byte[] ReadLengthPrefixed(NetworkStream ns)
+    {
+        // Read exactly 4 bytes for length
+        var lenBuf = ReadExact(ns, 4);
+        if (lenBuf == null) return null; // stream closed
+
+        int len = BitConverter.ToInt32(lenBuf, 0);
+        if (len < 0) throw new InvalidDataException("Negative length");
+        if (len == 0) return new byte[0];
+
+        var payload = ReadExact(ns, len);
+        if (payload == null) throw new EndOfStreamException("Stream closed mid-payload");
+        return payload;
+    }
+
+    // Reads exactly count bytes or returns null if stream closed before any bytes
+    public static byte[] ReadExact(NetworkStream ns, int count)
+    {
+        var buffer = new byte[count];
+        int read = 0;
+        while (read < count)
+        {
+            int n = ns.Read(buffer, read, count - read);
+            if (n == 0)
+            {
+                // if nothing read at all, return null, else throw
+                if (read == 0) return null;
+                throw new EndOfStreamException("Unexpected end of stream");
+            }
+            read += n;
+        }
+        return buffer;
+    }
+}
 
 public class LaserCommand
 {
     public string LaserOn;
     public string LaserOff;
-    public string Image;
+    public byte[] Image;
     public int FillingSpeed;
     public int BorderSpeed;
     public Tool Conversion;
