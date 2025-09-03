@@ -642,8 +642,6 @@ namespace LaserGRBL
             Core.OpenFile();
         }
 
-        private UdpClient udpClient;
-        private bool listening = true;
         private const int Port = 30001; // Choose your UDP port
 
         public static LaserCommand FromByteArray(byte[] data)
@@ -667,62 +665,6 @@ namespace LaserGRBL
 
                 laser.Image = reader.ReadBytes((int)(ms.Length - ms.Position)); // Read the remaining bytes as image data
                 return laser;
-            }
-        }
-
-        public async Task StartListeningAsync(int port)
-        {
-            using (UdpClient listener = new UdpClient(port))
-            {
-                while (listening)
-                {
-
-                    IPEndPoint groupEP = new IPEndPoint(IPAddress.Any, port);
-
-                    Console.WriteLine($"Listening on UDP port {port}...");
-
-
-                    UdpReceiveResult result = await listener.ReceiveAsync();
-                    byte[] receivedBytes = result.Buffer;
-
-                    try
-                    {
-
-
-                        //LaserCommand command = JsonSerializer.Deserialize<LaserCommand>(receivedBytes);
-                        LaserCommand command = FromByteArray(receivedBytes);
-
-                        CarverConfig.laserCommand = command;
-
-                        byte[] imageBytes = command.Image;
-                        File.WriteAllBytes("received_image.png", imageBytes);
-
-
-                        using (MemoryStream ms = new MemoryStream(imageBytes))
-                        {
-                            // Convert received bytes to Bitmap
-                            using (Bitmap receivedBitmap = new Bitmap(ms))
-                            {
-                                // Generate temporary file path
-                                string tempFilePath = Path.Combine(Path.GetTempPath(), "ReceivedImage.png");
-
-                                // Save image to temp file (as PNG)
-                                receivedBitmap.Save(tempFilePath, System.Drawing.Imaging.ImageFormat.Png);
-
-                                this.Invoke((MethodInvoker)delegate
-                                {
-                                    Core.OpenFile(filename: tempFilePath);
-                                });
-
-                            }
-                        }
-
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error deserializing message: {ex.Message}");
-                    }
-                }
             }
         }
 
@@ -1545,8 +1487,6 @@ namespace LaserGRBL
         }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            listening = false;
-            udpClient.Close();
             base.OnFormClosing(e);
         }
     }
