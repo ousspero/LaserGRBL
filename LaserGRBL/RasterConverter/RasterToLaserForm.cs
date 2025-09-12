@@ -270,7 +270,7 @@ namespace LaserGRBL.RasterConverter
 
                         if (IP.SelectedTool == Tool.Line2Line)
                         {
-                            IP.BorderSpeed = CarverConfig.laserCommand.BorderSpeed;
+                            IP.MarkSpeed = CarverConfig.laserCommand.BorderSpeed;
                             IP.MaxPower = CarverConfig.laserCommand.SMax;
                             IP.MinPower = int.Parse(CarverConfig.laserCommand.SMin);
                             IP.SelectedTool = CarverConfig.laserCommand.Conversion;
@@ -285,7 +285,7 @@ namespace LaserGRBL.RasterConverter
                             IP.MaxPower = CarverConfig.laserCommand.SMax;
                             IP.MinPower = int.Parse(CarverConfig.laserCommand.SMin);
                             IP.LaserOn = CarverConfig.laserCommand.LaserMode;
-                            IP.BorderSpeed = CarverConfig.laserCommand.BorderSpeed;
+                            IP.MarkSpeed = CarverConfig.laserCommand.BorderSpeed; // named border speed but actually represents mark speed to be changed after changing in the front end first to match it
                             // filling speed
                             IP.MarkSpeed = CarverConfig.laserCommand.FillingSpeed;
                         }
