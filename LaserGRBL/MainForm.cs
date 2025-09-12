@@ -406,6 +406,18 @@ namespace LaserGRBL
                 TTTLines.Text = Core.LoadedFile.Count.ToString();
                 //TTTLoadedIn.Text = elapsed.ToString() + " ms";
                 TTTEstimated.Text = Utils.TimeSpanToString(Core.LoadedFile.EstimatedTime, Utils.TimePrecision.Second, Utils.TimePrecision.Second, " ,", true);
+                SendUDPMessage("TIME"+TTTEstimated.Text);
+            }
+        }
+
+        public async void SendUDPMessage(string message)
+        {
+            using (UdpClient sender = new UdpClient())
+            {
+                IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(GrblCore.CarverConfigObject.PcIP), GrblCore.CarverConfigObject.PcPort);
+                byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+
+                await sender.SendAsync(messageBytes, messageBytes.Length, remoteEndPoint);
             }
         }
 
