@@ -684,7 +684,8 @@ namespace LaserGRBL
         private async Task StartUdpListener()
         {
             //  await StartListeningAsync(Port);
-
+            if (Core.MachineStatus == GrblCore.MacStatus.Disconnected)
+                Core.OpenCom();
             var listener = new TcpListener(IPAddress.Any, Port);
             listener.Start();
 
