@@ -3644,7 +3644,7 @@ namespace LaserGRBL
             return false;
         }
 
-        private async void SendMessages(string message)
+        public async void SendMessages(string message)
         {
             using (UdpClient sender = new UdpClient())
             {
