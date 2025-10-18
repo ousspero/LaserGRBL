@@ -8,8 +8,8 @@ using LaserGRBL.Icons;
 using LaserGRBL.UserControls;
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
-
 namespace LaserGRBL
 {
 	/// <summary>
@@ -92,6 +92,7 @@ namespace LaserGRBL
 		{
 			CBSpeed.BeginUpdate();
 			CBSpeed.Items.AddRange(baudRates);
+			CBSpeed.SelectedIndex = CBSpeed.Items.IndexOf(921600);
 			CBSpeed.EndUpdate();
 		}
 
@@ -117,64 +118,13 @@ namespace LaserGRBL
 				CBPort.SelectedItem = currentport;
 			else if (CBPort.Items.Count > 0)
 				CBPort.SelectedIndex = CBPort.Items.Count -1;
-			CBPort.EndUpdate();
-		}
 
-		//private static System.Text.RegularExpressions.Regex ComRX = new System.Text.RegularExpressions.Regex(@"(?'wholecom'(?:^|[ (])COM(?'comno'\d+)(?:[) ]|$))", System.Text.RegularExpressions.RegexOptions.Compiled);
-		//private System.Collections.Generic.SortedDictionary<int, string> GetPortDictionary()
-		//{
-		//	System.Collections.Generic.SortedDictionary<int, string> rv = new System.Collections.Generic.SortedDictionary<int, string>();
-		//
-		//	try //add using managment object
-		//	{
-		//		using (System.Management.ManagementObjectSearcher searcher = new System.Management.ManagementObjectSearcher(@"\\.\root\cimv2", "SELECT * FROM Win32_PnPEntity"))
-		//		{
-		//			System.Management.ManagementObjectCollection moc = searcher.Get();
-		//			foreach (System.Management.ManagementObject mo in moc)
-		//			{
-		//				string caption = (string)mo["Caption"];
-		//				if (caption != null && ComRX.IsMatch(caption))
-		//				{
-		//					System.Text.RegularExpressions.Match m = ComRX.Match(caption);
-		//					if (m != null && m.Groups["comno"] != null)
-		//					{
-		//						int no = int.Parse(m.Groups["comno"].Value);
-		//						string wholecom = m.Groups["wholecom"].Value;
-		//						if (!rv.ContainsKey(no))
-		//							rv.Add(int.Parse(m.Groups["comno"].Value), caption.Replace(wholecom, "").Trim());
-		//					}
-		//				}
-		//			}
-		//
-		//		}
-		//	}
-		//	catch { }
-		//
-		//	try //add using SerialPort.GetPortNames 
-		//	{
-		//		foreach (string dirty in System.IO.Ports.SerialPort.GetPortNames())
-		//		{
-		//			string comno = dirty;
-		//			if (!char.IsDigit(comno[comno.Length - 1]))
-		//				comno = comno.Substring(0, comno.Length - 1);
-		//
-		//			string caption = comno;
-		//			if (caption != null && ComRX.IsMatch(caption))
-		//			{
-		//				System.Text.RegularExpressions.Match m = ComRX.Match(caption);
-		//				if (m != null && m.Groups["comno"] != null)
-		//				{
-		//					int no = int.Parse(m.Groups["comno"].Value);
-		//					if (!rv.ContainsKey(no))
-		//						rv.Add(int.Parse(m.Groups["comno"].Value), "Generic COM Port");
-		//				}
-		//			}
-		//		}
-		//	}
-		//	catch { }
-		//
-		//	return rv;
-		//}
+			var defaultCom = CBPort.Items.OfType<string>().FirstOrDefault(s => s.Equals("COM5", StringComparison.OrdinalIgnoreCase));
+          
+            CBPort.SelectedIndex= CBPort.Items.IndexOf(defaultCom);
+
+            CBPort.EndUpdate();
+		}
 
 
 		void BtnConnectDisconnectClick(object sender, EventArgs e)
