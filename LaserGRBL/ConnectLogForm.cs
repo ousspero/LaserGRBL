@@ -12,180 +12,180 @@ using System.Linq;
 using System.Windows.Forms;
 namespace LaserGRBL
 {
-	/// <summary>
-	/// Description of ConnectLogForm.
-	/// </summary>
-	public partial class ConnectLogForm : System.Windows.Forms.UserControl
-	{
-		private object[] baudRates = { 4800, 9600, 19200, 38400, 57600, 115200, 230400, 256000, 460800, 921600 };
-		public ComWrapper.WrapperType currentWrapper;
+    /// <summary>
+    /// Description of ConnectLogForm.
+    /// </summary>
+    public partial class ConnectLogForm : System.Windows.Forms.UserControl
+    {
+        private object[] baudRates = { 4800, 9600, 19200, 38400, 57600, 115200, 230400, 256000, 460800, 921600 };
+        public ComWrapper.WrapperType currentWrapper;
 
-		GrblCore Core;
-		private string mLoadedFileName;
+        GrblCore Core;
+        private string mLoadedFileName;
 
-		public ConnectLogForm()
-		{
-			currentWrapper = Settings.GetObject("ComWrapper Protocol", ComWrapper.WrapperType.UsbSerial);
-			InitializeComponent();
+        public ConnectLogForm()
+        {
+            currentWrapper = Settings.GetObject("ComWrapper Protocol", ComWrapper.WrapperType.UsbSerial);
+            InitializeComponent();
         }
 
         public void SetCore(GrblCore core)
-		{
-			Core = core;
-			Core.OnFileLoaded += OnFileLoaded;
-			Core.OnLoopCountChange += OnLoopCountChanged;
-			CmdLog.SetCom(core);
+        {
+            Core = core;
+            Core.OnFileLoaded += OnFileLoaded;
+            Core.OnLoopCountChange += OnLoopCountChanged;
+            CmdLog.SetCom(core);
 
-			PB.Bars.Add(new LaserGRBL.UserControls.DoubleProgressBar.Bar(ColorScheme.PreviewCommandWait));
-			PB.Bars.Add(new LaserGRBL.UserControls.DoubleProgressBar.Bar(ColorScheme.PreviewCommandOK));
-			Size btnSize = new Size(20, 20);
-			IconsMgr.PrepareButton(BtnRunProgram, "mdi-play-circle", btnSize);
+            PB.Bars.Add(new LaserGRBL.UserControls.DoubleProgressBar.Bar(ColorScheme.PreviewCommandWait));
+            PB.Bars.Add(new LaserGRBL.UserControls.DoubleProgressBar.Bar(ColorScheme.PreviewCommandOK));
+            Size btnSize = new Size(20, 20);
+            IconsMgr.PrepareButton(BtnRunProgram, "mdi-play-circle", btnSize);
             IconsMgr.PrepareButton(BtnAbortProgram, "mdi-stop-circle", btnSize);
             IconsMgr.PrepareButton(BtnConnectDisconnect, "mdi-power-plug", btnSize, "mdi-power-plug-off");
             IconsMgr.PrepareButton(BtnOpen, "mdi-folder", btnSize);
 
             InitSpeedCB();
-			InitPortCB();
+            InitPortCB();
 
-			RestoreConf();
+            RestoreConf();
 
-			TimerUpdate();
-		}
+            TimerUpdate();
+        }
 
-		void OnLoopCountChanged(decimal current)
-		{
-			if (InvokeRequired)
-			{
-				Invoke(new GrblCore.dlgOnLoopCountChange(OnLoopCountChanged), current);
-			}
-			else
-			{
-				if (UDLoopCounter.Value != current)
-					UDLoopCounter.Value = current;
-			}
-		}
+        void OnLoopCountChanged(decimal current)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new GrblCore.dlgOnLoopCountChange(OnLoopCountChanged), current);
+            }
+            else
+            {
+                if (UDLoopCounter.Value != current)
+                    UDLoopCounter.Value = current;
+            }
+        }
 
-		private void RestoreConf()
-		{
-			CBSpeed.SelectedItem = Settings.GetObject("Serial Speed", 115200);
+        private void RestoreConf()
+        {
+            CBSpeed.SelectedItem = Settings.GetObject("Serial Speed", 115200);
 
-			if (currentWrapper == ComWrapper.WrapperType.Telnet)
-				TxtAddress.Text = Settings.GetObject("Telnet Address", "127.0.0.1:23");	
-			else if (currentWrapper == ComWrapper.WrapperType.LaserWebESP8266)
-				TxtAddress.Text = Settings.GetObject("Websocket URL", "ws://127.0.0.1:81/"); 
-		}
+            if (currentWrapper == ComWrapper.WrapperType.Telnet)
+                TxtAddress.Text = Settings.GetObject("Telnet Address", "127.0.0.1:23");
+            else if (currentWrapper == ComWrapper.WrapperType.LaserWebESP8266)
+                TxtAddress.Text = Settings.GetObject("Websocket URL", "ws://127.0.0.1:81/");
+        }
 
-		void OnFileLoaded(long elapsed, string filename)
-		{
-			if (InvokeRequired)
-			{
-				Invoke(new GrblFile.OnFileLoadedDlg(OnFileLoaded), elapsed, filename);
-			}
-			else
-			{
-				mLoadedFileName = filename;
-				TbFileName.Text = System.IO.Path.GetFileName(filename);
-			}
-		}
+        void OnFileLoaded(long elapsed, string filename)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new GrblFile.OnFileLoadedDlg(OnFileLoaded), elapsed, filename);
+            }
+            else
+            {
+                mLoadedFileName = filename;
+                TbFileName.Text = System.IO.Path.GetFileName(filename);
+            }
+        }
 
-		private void InitSpeedCB() //Baud Rates combo box
-		{
-			CBSpeed.BeginUpdate();
-			CBSpeed.Items.AddRange(baudRates);
-			CBSpeed.SelectedIndex = CBSpeed.Items.IndexOf(921600);
-			CBSpeed.EndUpdate();
-		}
+        private void InitSpeedCB() //Baud Rates combo box
+        {
+            CBSpeed.BeginUpdate();
+            CBSpeed.Items.AddRange(baudRates);
+            CBSpeed.SelectedIndex = CBSpeed.Items.IndexOf(921600);
+            CBSpeed.EndUpdate();
+        }
 
-		private void InitPortCB() //Availabe Ports combo box
-		{
-			string currentport = CBPort.SelectedItem as string;
-			CBPort.BeginUpdate();
-			CBPort.Items.Clear();
+        private void InitPortCB() //Availabe Ports combo box
+        {
+            string currentport = CBPort.SelectedItem as string;
+            CBPort.BeginUpdate();
+            CBPort.Items.Clear();
 
-			foreach (string portname in System.IO.Ports.SerialPort.GetPortNames())
-			{
-				string purgename = portname;
+            foreach (string portname in System.IO.Ports.SerialPort.GetPortNames())
+            {
+                string purgename = portname;
 
-				//FIX https://github.com/arkypita/LaserGRBL/issues/31
+                //FIX https://github.com/arkypita/LaserGRBL/issues/31
 
-				if (!char.IsDigit(purgename[purgename.Length - 1]))
-					purgename = purgename.Substring(0, purgename.Length - 1);
+                if (!char.IsDigit(purgename[purgename.Length - 1]))
+                    purgename = purgename.Substring(0, purgename.Length - 1);
 
-				CBPort.Items.Add(purgename);
-			}
+                CBPort.Items.Add(purgename);
+            }
 
-			if (currentport != null && CBPort.Items.Contains(currentport))
-				CBPort.SelectedItem = currentport;
-			else if (CBPort.Items.Count > 0)
-				CBPort.SelectedIndex = CBPort.Items.Count -1;
+            if (currentport != null && CBPort.Items.Contains(currentport))
+                CBPort.SelectedItem = currentport;
+            else if (CBPort.Items.Count > 0)
+                CBPort.SelectedIndex = CBPort.Items.Count - 1;
 
-			var defaultCom = CBPort.Items.OfType<string>().FirstOrDefault(s => s.Equals("COM5", StringComparison.OrdinalIgnoreCase));
-          
-            CBPort.SelectedIndex= CBPort.Items.IndexOf(defaultCom);
+            var defaultCom = CBPort.Items.OfType<string>().FirstOrDefault(s => s.Equals("COM5", StringComparison.OrdinalIgnoreCase));
+            if (defaultCom != null)
+                CBPort.SelectedIndex = CBPort.Items.IndexOf(defaultCom);
 
             CBPort.EndUpdate();
-		}
+        }
 
 
-		void BtnConnectDisconnectClick(object sender, EventArgs e)
-		{
-			if (Core.MachineStatus == GrblCore.MacStatus.Disconnected)
-				Core.OpenCom();
-			else if (!(Core.InProgram && System.Windows.Forms.MessageBox.Show(Strings.DisconnectAnyway, Strings.WarnMessageBoxHeader, MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) != System.Windows.Forms.DialogResult.Yes))
-				Core.CloseCom(true);
+        void BtnConnectDisconnectClick(object sender, EventArgs e)
+        {
+            if (Core.MachineStatus == GrblCore.MacStatus.Disconnected)
+                Core.OpenCom();
+            else if (!(Core.InProgram && System.Windows.Forms.MessageBox.Show(Strings.DisconnectAnyway, Strings.WarnMessageBoxHeader, MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) != System.Windows.Forms.DialogResult.Yes))
+                Core.CloseCom(true);
 
-			TimerUpdate();
-		}
+            TimerUpdate();
+        }
 
 
-		void ApplyConfig()
-		{
-			if ((currentWrapper == ComWrapper.WrapperType.UsbSerial || currentWrapper == ComWrapper.WrapperType.UsbSerial2 || currentWrapper == ComWrapper.WrapperType.RJCPSerial) && CBPort.Text != null && CBSpeed.SelectedItem != null)
-				Core.Configure(currentWrapper, CBPort.Text, (int)CBSpeed.SelectedItem);
-			else if (currentWrapper == ComWrapper.WrapperType.Telnet || currentWrapper == ComWrapper.WrapperType.LaserWebESP8266)
-				Core.Configure(currentWrapper, (string)TxtAddress.Text);
-			else if (currentWrapper == ComWrapper.WrapperType.Emulator)
-				Core.Configure(currentWrapper);
-		}
+        void ApplyConfig()
+        {
+            if ((currentWrapper == ComWrapper.WrapperType.UsbSerial || currentWrapper == ComWrapper.WrapperType.UsbSerial2 || currentWrapper == ComWrapper.WrapperType.RJCPSerial) && CBPort.Text != null && CBSpeed.SelectedItem != null)
+                Core.Configure(currentWrapper, CBPort.Text, (int)CBSpeed.SelectedItem);
+            else if (currentWrapper == ComWrapper.WrapperType.Telnet || currentWrapper == ComWrapper.WrapperType.LaserWebESP8266)
+                Core.Configure(currentWrapper, (string)TxtAddress.Text);
+            else if (currentWrapper == ComWrapper.WrapperType.Emulator)
+                Core.Configure(currentWrapper);
+        }
 
-		void BtnOpenClick(object sender, EventArgs e)
-		{
-			Core.OpenFile();
-		}
+        void BtnOpenClick(object sender, EventArgs e)
+        {
+            Core.OpenFile();
+        }
 
-		void BtnRunProgramClick(object sender, EventArgs e)
-		{
-			BtnRunProgram.Enabled = false;
-			Core.RunProgram(ParentForm);
-		}
-		void TxtManualCommandCommandEntered(string command)
-		{
-			Core.EnqueueCommand(new GrblCommand(command, 0, true));
-		}
-		
-		public void TimerUpdate()
-		{
-			SuspendLayout();
+        void BtnRunProgramClick(object sender, EventArgs e)
+        {
+            BtnRunProgram.Enabled = false;
+            Core.RunProgram(ParentForm);
+        }
+        void TxtManualCommandCommandEntered(string command)
+        {
+            Core.EnqueueCommand(new GrblCommand(command, 0, true));
+        }
 
-			if (!Core.IsConnected && System.IO.Ports.SerialPort.GetPortNames().Length != CBPort.Items.Count)
-				InitPortCB();
-			
-			PB.Maximum = Core.ProgramTarget;
-			PB.Bars[0].Value = Core.ProgramSent;
-			PB.Bars[1].Value = Core.ProgramExecuted;
+        public void TimerUpdate()
+        {
+            SuspendLayout();
 
-			string val = Tools.Utils.TimeSpanToString(Core.ProgramTime, Tools.Utils.TimePrecision.Minute, Tools.Utils.TimePrecision.Second, " ,", true);
+            if (!Core.IsConnected && System.IO.Ports.SerialPort.GetPortNames().Length != CBPort.Items.Count)
+                InitPortCB();
 
-			if (val != "now")
-				PB.PercString = val;
-			else if (Core.InProgram)
-				PB.PercString = "0 sec";
-			else
-				PB.PercString = "";
-			
-			PB.Invalidate();
+            PB.Maximum = Core.ProgramTarget;
+            PB.Bars[0].Value = Core.ProgramSent;
+            PB.Bars[1].Value = Core.ProgramExecuted;
 
-			/*
+            string val = Tools.Utils.TimeSpanToString(Core.ProgramTime, Tools.Utils.TimePrecision.Minute, Tools.Utils.TimePrecision.Second, " ,", true);
+
+            if (val != "now")
+                PB.PercString = val;
+            else if (Core.InProgram)
+                PB.PercString = "0 sec";
+            else
+                PB.PercString = "";
+
+            PB.Invalidate();
+
+            /*
 			Idle: All systems are go, no motions queued, and it's ready for anything.
 			Run: Indicates a cycle is running.
 			Hold: A feed hold is in process of executing, or slowing down to a stop. After the hold is complete, Grbl will remain in Hold and wait for a cycle start to resume the program.
@@ -195,101 +195,101 @@ namespace LaserGRBL
 			Check: Grbl is in check G-code mode. It will process and respond to all G-code commands, but not motion or turn on anything. Once toggled off with another '$C' command, Grbl will reset itself.
 			*/
 
-			TT.SetToolTip(BtnConnectDisconnect, Core.IsConnected ? Strings.BtnDisconnectTT : Strings.BtnConnectTT);
-			
-			BtnConnectDisconnect.UseAltImage = Core.IsConnected;
-			BtnRunProgram.Enabled = Core.CanSendFile;
+            TT.SetToolTip(BtnConnectDisconnect, Core.IsConnected ? Strings.BtnDisconnectTT : Strings.BtnConnectTT);
+
+            BtnConnectDisconnect.UseAltImage = Core.IsConnected;
+            BtnRunProgram.Enabled = Core.CanSendFile;
             BtnRunProgram.Visible = !Core.CanAbortProgram;
             BtnAbortProgram.Visible = Core.CanAbortProgram;
             BtnOpen.Enabled = Core.CanLoadNewFile;
 
-			bool old = TxtManualCommand.Enabled;
-			TxtManualCommand.Enabled = Core.CanSendManualCommand;
-			//if (old == false && TxtManualCommand.Enabled == true)
-			//	TxtManualCommand.Focus();
+            bool old = TxtManualCommand.Enabled;
+            TxtManualCommand.Enabled = Core.CanSendManualCommand;
+            //if (old == false && TxtManualCommand.Enabled == true)
+            //	TxtManualCommand.Focus();
 
-			//CBProtocol.Enabled = !Core.IsOpen;
-			CBPort.Enabled = !Core.IsConnected;
-			CBSpeed.Enabled = !Core.IsConnected;
-			TxtAddress.Enabled = !Core.IsConnected;
+            //CBProtocol.Enabled = !Core.IsOpen;
+            CBPort.Enabled = !Core.IsConnected;
+            CBSpeed.Enabled = !Core.IsConnected;
+            TxtAddress.Enabled = !Core.IsConnected;
 
-			CmdLog.TimerUpdate();
+            CmdLog.TimerUpdate();
 
-			if (!Core.IsConnected)
-			{
-				ComWrapper.WrapperType actualWrapper = Settings.GetObject("ComWrapper Protocol", ComWrapper.WrapperType.UsbSerial);
-				if (actualWrapper != currentWrapper)
-				{
-					currentWrapper = actualWrapper;
-					UpdateConf();
-				}
-			}
+            if (!Core.IsConnected)
+            {
+                ComWrapper.WrapperType actualWrapper = Settings.GetObject("ComWrapper Protocol", ComWrapper.WrapperType.UsbSerial);
+                if (actualWrapper != currentWrapper)
+                {
+                    currentWrapper = actualWrapper;
+                    UpdateConf();
+                }
+            }
 
-			ResumeLayout();
-		}
+            ResumeLayout();
+        }
 
-		private void CBPort_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			UpdateConf();
-		}
+        private void CBPort_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateConf();
+        }
 
-		private void CBPort_TextChanged(object sender, EventArgs e)
-		{
-			UpdateConf();
-		}
+        private void CBPort_TextChanged(object sender, EventArgs e)
+        {
+            UpdateConf();
+        }
 
-		private void CBSpeed_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			UpdateConf();
-		}
+        private void CBSpeed_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateConf();
+        }
 
-		
-		private void UpdateConf()
-		{
-			tableLayoutPanel4.SuspendLayout();
-			CBPort.Visible = CBSpeed.Visible = LblComPort.Visible = LblBaudRate.Visible = (currentWrapper == ComWrapper.WrapperType.UsbSerial || currentWrapper == ComWrapper.WrapperType.UsbSerial2 || currentWrapper == ComWrapper.WrapperType.RJCPSerial);
-			TxtAddress.Visible = LblAddress.Visible = (currentWrapper == ComWrapper.WrapperType.Telnet || currentWrapper == ComWrapper.WrapperType.LaserWebESP8266);
-			LblAddress.Text = (currentWrapper == ComWrapper.WrapperType.Telnet ? "IP:PORT" : "Socket URL");
-			TxtEmulator.Visible = LblEmulator.Visible = (currentWrapper == ComWrapper.WrapperType.Emulator);
-			tableLayoutPanel4.ResumeLayout();
 
-			if (CBSpeed.SelectedItem != null)
-				Settings.SetObject("Serial Speed", CBSpeed.SelectedItem);
+        private void UpdateConf()
+        {
+            tableLayoutPanel4.SuspendLayout();
+            CBPort.Visible = CBSpeed.Visible = LblComPort.Visible = LblBaudRate.Visible = (currentWrapper == ComWrapper.WrapperType.UsbSerial || currentWrapper == ComWrapper.WrapperType.UsbSerial2 || currentWrapper == ComWrapper.WrapperType.RJCPSerial);
+            TxtAddress.Visible = LblAddress.Visible = (currentWrapper == ComWrapper.WrapperType.Telnet || currentWrapper == ComWrapper.WrapperType.LaserWebESP8266);
+            LblAddress.Text = (currentWrapper == ComWrapper.WrapperType.Telnet ? "IP:PORT" : "Socket URL");
+            TxtEmulator.Visible = LblEmulator.Visible = (currentWrapper == ComWrapper.WrapperType.Emulator);
+            tableLayoutPanel4.ResumeLayout();
 
-			if (!string.IsNullOrWhiteSpace(TxtAddress.Text))
-			{
-				if (currentWrapper == ComWrapper.WrapperType.Telnet)
-					Settings.SetObject("Telnet Address", TxtAddress.Text);
-				else if (currentWrapper == ComWrapper.WrapperType.LaserWebESP8266)
-					Settings.SetObject("Websocket URL", TxtAddress.Text);
-			}
+            if (CBSpeed.SelectedItem != null)
+                Settings.SetObject("Serial Speed", CBSpeed.SelectedItem);
 
-			ApplyConfig();
-		}
+            if (!string.IsNullOrWhiteSpace(TxtAddress.Text))
+            {
+                if (currentWrapper == ComWrapper.WrapperType.Telnet)
+                    Settings.SetObject("Telnet Address", TxtAddress.Text);
+                else if (currentWrapper == ComWrapper.WrapperType.LaserWebESP8266)
+                    Settings.SetObject("Websocket URL", TxtAddress.Text);
+            }
 
-		private void CBProtocol_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			UpdateConf();
-		}
+            ApplyConfig();
+        }
 
-		private void TxtHostName_TextChanged(object sender, EventArgs e)
-		{
-			UpdateConf();
-		}
+        private void CBProtocol_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateConf();
+        }
 
-		private void ITcpPort_CurrentValueChanged(object sender, int NewValue, bool ByUser)
-		{
-			UpdateConf();
-		}
+        private void TxtHostName_TextChanged(object sender, EventArgs e)
+        {
+            UpdateConf();
+        }
 
-		private void UDLoopCounter_ValueChanged(object sender, EventArgs e)
-		{
-			Core.LoopCount = UDLoopCounter.Value;
-		}
+        private void ITcpPort_CurrentValueChanged(object sender, int NewValue, bool ByUser)
+        {
+            UpdateConf();
+        }
 
-		internal void OnColorChange()
-		{
-			TbFileName.BackColor = ColorScheme.LogBackColor;
+        private void UDLoopCounter_ValueChanged(object sender, EventArgs e)
+        {
+            Core.LoopCount = UDLoopCounter.Value;
+        }
+
+        internal void OnColorChange()
+        {
+            TbFileName.BackColor = ColorScheme.LogBackColor;
             TbFileName.ForeColor = ColorScheme.FormForeColor;
 
             TbFileName.BorderColor = ColorScheme.ControlsBorder;
@@ -298,37 +298,37 @@ namespace LaserGRBL
             TxtManualCommand.WaterMarkColor = ColorScheme.ControlsBorder;
             TxtManualCommand.WaterMarkActiveColor = ColorScheme.ControlsBorder;
             TxtManualCommand.BackColor = ColorScheme.LogBackColor;
-			TxtManualCommand.ForeColor = ColorScheme.FormForeColor;
+            TxtManualCommand.ForeColor = ColorScheme.FormForeColor;
 
-			PB.ForeColor = ColorScheme.FormForeColor;
+            PB.ForeColor = ColorScheme.FormForeColor;
             PB.FillColor = ColorScheme.LogBackColor;
             PB.Bars.Clear();
-			PB.Bars.Add(new LaserGRBL.UserControls.DoubleProgressBar.Bar(ColorScheme.PreviewCommandWait));
-			PB.Bars.Add(new LaserGRBL.UserControls.DoubleProgressBar.Bar(ColorScheme.PreviewCommandOK));
+            PB.Bars.Add(new LaserGRBL.UserControls.DoubleProgressBar.Bar(ColorScheme.PreviewCommandWait));
+            PB.Bars.Add(new LaserGRBL.UserControls.DoubleProgressBar.Bar(ColorScheme.PreviewCommandOK));
             CmdLog.OnColorChange();
             CmdLog.Invalidate();
-		}
+        }
 
-		private void TxtManualCommand_Enter(object sender, EventArgs e)
-		{
-			Core.SuspendHK = true;
-		}
+        private void TxtManualCommand_Enter(object sender, EventArgs e)
+        {
+            Core.SuspendHK = true;
+        }
 
-		private void TxtManualCommand_Leave(object sender, EventArgs e)
-		{
-			Core.SuspendHK = false;
-		}
+        private void TxtManualCommand_Leave(object sender, EventArgs e)
+        {
+            Core.SuspendHK = false;
+        }
 
-		private void TbFileName_MouseEnter(object sender, EventArgs e)
-		{
-			if (mLoadedFileName != null)
-				TT.Show(mLoadedFileName, TbFileName, 5000);
-		}
+        private void TbFileName_MouseEnter(object sender, EventArgs e)
+        {
+            if (mLoadedFileName != null)
+                TT.Show(mLoadedFileName, TbFileName, 5000);
+        }
 
-		private void TbFileName_MouseLeave(object sender, EventArgs e)
-		{
-			TT.Hide(TbFileName);
-		}
+        private void TbFileName_MouseLeave(object sender, EventArgs e)
+        {
+            TT.Hide(TbFileName);
+        }
 
         private void BtnAbortProgram_Click(object sender, EventArgs e)
         {
@@ -336,28 +336,28 @@ namespace LaserGRBL
                 Core.AbortProgram();
         }
 
-		internal void ConfigFromDiscovery(string config)
-		{
-			if (TxtAddress.Visible && TxtAddress.Enabled && config != null)
-			{
-				TxtAddress.Text = config;
-				Application.DoEvents();
+        internal void ConfigFromDiscovery(string config)
+        {
+            if (TxtAddress.Visible && TxtAddress.Enabled && config != null)
+            {
+                TxtAddress.Text = config;
+                Application.DoEvents();
 
-				if (BtnConnectDisconnect.Enabled && Core.MachineStatus == GrblCore.MacStatus.Disconnected)
-					BtnConnectDisconnectClick(null, null);
-			}
-		}
+                if (BtnConnectDisconnect.Enabled && Core.MachineStatus == GrblCore.MacStatus.Disconnected)
+                    BtnConnectDisconnectClick(null, null);
+            }
+        }
 
-		internal void ConfigFromWiFiForm(string config)
-		{
-			if (config != null)
-			{
-				TxtAddress.Text = config;
-				Application.DoEvents();
+        internal void ConfigFromWiFiForm(string config)
+        {
+            if (config != null)
+            {
+                TxtAddress.Text = config;
+                Application.DoEvents();
 
-				//if (BtnConnectDisconnect.Enabled && Core.MachineStatus == GrblCore.MacStatus.Disconnected)
-				//	BtnConnectDisconnectClick(null, null);
-			}
+                //if (BtnConnectDisconnect.Enabled && Core.MachineStatus == GrblCore.MacStatus.Disconnected)
+                //	BtnConnectDisconnectClick(null, null);
+            }
         }
 
         private void CmdLog_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
