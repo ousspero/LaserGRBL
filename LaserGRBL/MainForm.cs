@@ -10,6 +10,7 @@ using LaserGRBL.WiFiConfigurator;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Net;
@@ -41,6 +42,7 @@ namespace LaserGRBL
         private bool PromptForWiFiShown;
         private readonly string[] args;
         private readonly List<ToolStripMenuItem> mLineWidthMenu;
+        private const int Port = 30001; // Choose your UDP port
 
 
         public MainForm()
@@ -136,7 +138,7 @@ namespace LaserGRBL
             //RefreshMenuHotKeys(); // I don't like the behaviour and the aspect, so I comment it out
             
             BackgroundWorker backgroundWorker = new BackgroundWorker();
-            backgroundWorker.DoWork += async (s, e) => StartUdpListener();
+            backgroundWorker.DoWork += async (s, e) =>  await StartUdpListener();
             backgroundWorker.RunWorkerAsync();
         }
 
@@ -654,7 +656,6 @@ namespace LaserGRBL
             Core.OpenFile();
         }
 
-        private const int Port = 30001; // Choose your UDP port
 
         public static LaserCommand FromByteArray(byte[] data)
         {
@@ -683,6 +684,7 @@ namespace LaserGRBL
 
         private async Task StartUdpListener()
         {
+            Debug.WriteLine("Udp started listening on port " + Port);
             //  await StartListeningAsync(Port);
             if (Core.MachineStatus == GrblCore.MacStatus.Disconnected)
                 Core.OpenCom();
